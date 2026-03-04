@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, NavLink } from "react-router-dom";
 import Home from "./pages/Home.jsx"
 import About from "./pages/About.jsx"
 import Contact from "./pages/Contact.jsx"
@@ -10,7 +10,7 @@ function App() {
             <nav style={{ display: "flex", gap: "20px" }}>
                 <Link to="/">Home</Link>
                 <Link to="/about">About</Link>
-                <Link to="/contact">Contact</Link>
+                <NavLink to="/contact" style={({ isActive }) => ({color: isActive ? "red" : "blue"})}> Contact</NavLink>
             </nav>
 
             <Routes>
