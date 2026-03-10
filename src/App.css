@@ -5,17 +5,42 @@
   text-align: center;
 }
 
-.app {
-  
-}
-.login-page {
-  border: 1px solid rgb(179, 171, 171);
-  padding: 20px;
+.auth-page {
+  border: 1px solid #383232;
+  padding: 25px;
   border-radius: 10px;
+  background-color: #242424;
 }
 
-.login-page form{
+.auth-page form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+
+}
+
+.auth-page label {
+  text-align: left;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: 0.5rem;
+  margin-bottom: 5px;
+}
+
+.auth-page input {
+  padding: 11px 15px;
+  border: 1px solid #3d3535;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #e7dfdf;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 200px;
+}
+
+.auth-page button {
+  margin-top: 10px;
+}
+.auth-page p {
+  font-size: 12px;
 }
