@@ -13,7 +13,7 @@ export default function SignupPage() {
         e.preventDefault()
         try {
             await createUserWithEmailAndPassword(auth, email, password)
-            navigate("/dashboard")
+            navigate("/login")
         } catch (error) {
             console.log(error.message)
         }
@@ -30,7 +30,7 @@ export default function SignupPage() {
                 <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
                 <label>Email</label>
                 <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-                <p className="auth-toggle"> Already have an account? {' '}
+                <p className="auth-toggle">Already have an account? {' '}
                     <span onClick={toggleSignin}>Sign In</span>
                 </p>
                 <button type="submit">Create Account</button>
