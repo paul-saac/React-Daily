@@ -1,9 +1,15 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { signOut } from "firebase/auth"
 import { auth } from "../services/firebase"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
+import * as pdfjsLib from "pdfjs-dist"
 import "../Dashboard.css"
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.mjs",
+  import.meta.url
+).toString()
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -11,6 +17,42 @@ export default function Dashboard() {
   const [text, setText] = useState("")
   const [summary, setSummary] = useState("")
   const [loading, setLoading] = useState(false)
+  const [fileName, setFileName] = useState("")
+  const fileInputRef = useRef(null)
+
+  const extractTextFromPdf = async (file) => {
+    const arrayBuffer = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    let fullText = ""
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const content = await page.getTextContent()
+      const pageText = content.items.map((item) => item.str).join(" ")
+      fullText += pageText + "\n\n"
+    }
+
+    return fullText.trim()
+  }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (file.type !== "application/pdf") {
+      alert("Please upload a PDF file.")
+      return
+    }
+
+    setFileName(file.name)
+    try {
+      const extractedText = await extractTextFromPdf(file)
+      setText(extractedText)
+    } catch (error) {
+      console.error("Failed to extract PDF text:", error.message)
+      alert("Failed to read the PDF. Please try another file.")
+    }
+  }
 
   const handleSummarize = async () => {
     if (!text.trim()) return
@@ -41,7 +83,25 @@ export default function Dashboard() {
 
       <main className="dashboard__main">
         <h2>Summarize Text</h2>
-        <p className="dashboard__hint">Paste your text below and click Summarize.</p>
+        <p className="dashboard__hint">Paste your text below or upload a PDF file.</p>
+
+        <div className="dashboard__upload">
+          <input
+            type="file"
+            accept=".pdf"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            hidden
+          />
+          <button
+            className="dashboard__upload-btn"
+            onClick={() => fileInputRef.current.click()}
+          >
+            Upload PDF
+          </button>
+          {fileName && <span className="dashboard__filename">{fileName}</span>}
+        </div>
+
         <textarea
           rows="10"
           placeholder="Paste your text here..."
