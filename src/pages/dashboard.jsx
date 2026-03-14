@@ -95,11 +95,7 @@ export default function Dashboard() {
 
         <textarea rows="10" placeholder="Paste your text here..." value={text} onChange={(e) => setText(e.target.value)}/>
           
-        <button
-          className="dashboard__summarize"
-          onClick={handleSummarize}
-          disabled={loading}
-        >
+        <button className="dashboard__summarize" onClick={handleSummarize} disabled={loading}>
           {loading ? "Summarizing..." : "Summarize"}
         </button>
 
