@@ -3,6 +3,7 @@ import { signOut } from "firebase/auth"
 import { auth } from "../services/firebase"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as pdfjsLib from "pdfjs-dist"
 import "../Dashboard.css"
 
@@ -19,6 +20,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [fileName, setFileName] = useState("")
   const fileInputRef = useRef(null)
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+  const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null
 
   const extractTextFromPdf = async (file) => {
     const arrayBuffer = await file.arrayBuffer()
@@ -56,11 +59,30 @@ export default function Dashboard() {
 
   const handleSummarize = async () => {
     if (!text.trim()) return
+    if (!genAI) {
+      alert("Gemini API key is missing. Add VITE_GEMINI_API_KEY in .env.local")
+      return
+    }
+
     setLoading(true)
     try {
-      setSummary("Summary will appear here once you connect an AI API.")
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+      const prompt = `
+Summarize the following text in clear bullet points.
+Keep it concise and preserve key facts.
+
+Text:
+${text}
+`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const output = response.text()
+      setSummary(output)
     } catch (error) {
-      console.error(error.message)
+      console.error("Gemini summarize failed:", error)
+      alert("Failed to summarize. Check API key, quota, and network.")
     } finally {
       setLoading(false)
     }
@@ -86,13 +108,13 @@ export default function Dashboard() {
         <p className="dashboard__hint">Paste your text below or upload a PDF file.</p>
 
         <div className="dashboard__upload">
-          <input type="file" accept=".pdf" ref={fileInputRef} onChange={handleFileUpload} hidden/>
+          <input type="file" accept=".pdf" ref={fileInputRef} onChange={handleFileUpload} hidden />
           <button className="dashboard__upload-btn" onClick={() => fileInputRef.current.click()}>Upload PDF</button>
           {fileName && <span className="dashboard__filename">{fileName}</span>}
         </div>
 
-        <textarea rows="10" placeholder="Paste your text here..." value={text} onChange={(e) => setText(e.target.value)}/>
-          
+        <textarea rows="10" placeholder="Paste your text here..." value={text} onChange={(e) => setText(e.target.value)} />
+
         <button className="dashboard__summarize" onClick={handleSummarize} disabled={loading}>
           {loading ? "Summarizing..." : "Summarize"}
         </button>
